@@ -1,0 +1,21 @@
+{
+  "name": "create-node-stack",
+  "version": "1.0.0",
+  "description": "This is a node project setup cli scapfoling command",
+  "main": "index.js",
+  "bin": {
+    "create-node-stack" : "./index.js"
+  },
+
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cli",
+    "command",
+    "scapfoling",
+    "command"
+  ],
+  "author": "Aniket",
+  "license": "ISC"
+}
