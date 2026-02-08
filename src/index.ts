@@ -19,6 +19,7 @@ async function main() {
     process.exit(1);
   }
 
+  // optimize the flow leter
   // create project filder
   fs.mkdirSync(projectPath);
   console.log("📁 Project folder created:", projectName);
@@ -42,8 +43,11 @@ async function main() {
     version: "0.0.1",
     private: true,
     scripts: isTS
-      ? { dev: "ts-node src/index.ts" }
-      : { dev: "node src/index.js" },
+      ? {
+          build: "tsc",
+          start: "node dist/index.ts",
+        }
+      : { start: "node src/index.js" },
   };
 
   // create the packege.json file and insert the content into it
@@ -64,12 +68,40 @@ async function main() {
 
   console.log("📦 Installing dependencies...");
 
-  execSync("npm install", {
-    cwd: projectPath,
-    stdio: "inherit",
-  });
+  if (isTS) {
+    execSync("npm i typescript @types/node", {
+      cwd: projectPath,
+      stdio: "inherit",
+    });
+  } else {
+    execSync("npm install", {
+      cwd: projectPath,
+      stdio: "inherit",
+    });
+  }
 
   console.log("✅ Dependencies installed");
+
+  if (isTS) {
+    const tsConfig = {
+      compilerOptions: {
+        // target : "ES2020"
+        module: "nodenext",
+        target: "esnext",
+        types: ["node"],
+        rootDir: "src",
+        outDir: "dist",
+        strict: true,
+      },
+    };
+
+    fs.writeFileSync(
+      `${projectPath}/tsconfig.json`,
+      JSON.stringify(tsConfig, null, 2),
+    );
+
+    console.log("🛠 tsconfig.json created");
+  }
 
   console.log("Project Created 🔥");
 }
