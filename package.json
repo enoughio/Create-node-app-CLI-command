@@ -4,7 +4,7 @@
   "description": "This is a node project setup cli scapfoling command",
   "main": "index.js",
   "bin": {
-    "create-node-stack": "dist/index.js"
+    "create-node-app": "dist/index.js"
   },
   "type": "module",
   "scripts": {
