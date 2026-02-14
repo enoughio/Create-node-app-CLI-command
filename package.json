@@ -1,10 +1,10 @@
 {
-  "name": "create-node-stack",
+  "name": "create-nodejs-app",
   "version": "1.0.0",
   "description": "This is a node project setup cli scapfoling command",
   "main": "index.js",
   "bin": {
-    "create-node-app": "dist/index.js"
+    "create-nodejs-app": "dist/index.js"
   },
   "type": "module",
   "scripts": {
