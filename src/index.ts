@@ -3,6 +3,9 @@
 import fs from "fs";
 import inquirer from "inquirer";
 import { execSync } from "child_process";
+import chalk from "chalk";
+
+// import chalk from "chalk";
 
 async function main() {
   const projectName = process.argv[2];
@@ -20,9 +23,10 @@ async function main() {
   }
 
   // optimize the flow leter
-  // create project filder
+  // create project folder
   fs.mkdirSync(projectPath);
-  console.log("📁 Project folder created:", projectName);
+  console.log(chalk.cyan("📁 Creating Project ", projectName));
+  console.log(chalk.green("✔ Project folder created"));
 
   // ask for programing lenguage
   const { language } = await inquirer.prompt([
@@ -34,47 +38,24 @@ async function main() {
     },
   ]);
 
-
-  // ask for express
-  const { useExpress } = await inquirer.prompt([
+  const { tools } = await inquirer.prompt([
     {
-      type: "confirm",
-      name: "useExpress",
-      message: "Do you want to use express",
-      default: true,
+      type: "checkbox",
+      name: "tools",
+      message: "Select tools to include",
+      choices: [
+        { name: "Express", value: "express", checked: false },
+        { name: "Prisma", value: "prisma", checked: false },
+        { name: "Zod", value: "zod", checked: false },
+        { name: "Dotenv", value: "env", checked: false },
+      ],
     },
   ]);
 
-  // ask for zod
-  const { useZod } = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "useZod",
-      message: "Do you want to use Zod for schema validation",
-      default: true,
-    },
-  ]);
-
-
-  // ask for zod
-  const { useEnv } = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "useEnv",
-      message: "Do you want to use .env file",
-      default: true,
-    },
-  ]);
-
-  // ask for prisma 
-  const { usePrisma } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'usePrisma',
-      message: 'Do you want to use Prisma as your ORM',
-      default: true
-    }
-  ])
+  const useExpress = tools.includes("express");
+  const usePrisma = tools.includes("prisma");
+  const useZod = tools.includes("zod");
+  const useEnv = tools.includes("env");
 
   let prismaDB = null;
   // ask for prismaDB
@@ -84,12 +65,12 @@ async function main() {
         type: "list",
         name: "prismaDB",
         message: "Which Database you want to use with Prisma",
-        choices: ['an SQL Database', 'Mongodb']
-      }
-    ])
+        choices: ["PostgreSQL", "MySQL", "SQLite"],
+      },
+    ]);
     prismaDB = res.prismaDB;
-    if (prismaDB == 'an SQL Database') {
-      prismaDB = 'postgresql'
+    if (prismaDB == "an SQL Database") {
+      prismaDB = "postgresql";
     }
   }
 
@@ -101,7 +82,7 @@ async function main() {
         type: "list",
         name: "database",
         message: "Which database you want to use",
-        choices: ['postgreSQL', 'MongoDB', "No database"]
+        choices: ["postgreSQL", "MongoDB", "No database"],
       },
     ]);
     database = res.database;
@@ -114,12 +95,13 @@ async function main() {
   const packageJson = {
     name: projectName,
     version: "0.0.1",
+    type: "module",
     private: true,
     scripts: isTS
       ? {
-        build: "tsc",
-        start: "node dist/index.ts",
-      }
+          build: "tsc",
+          start: "node dist/index.js",
+        }
       : { start: "node src/index.js" },
   };
 
@@ -129,30 +111,28 @@ async function main() {
     JSON.stringify(packageJson, null, 2),
   );
 
-
   // create src folder
   const srcPath = `${projectPath}/src`;
   fs.mkdirSync(srcPath, {
     recursive: true,
   });
 
-
   if (useExpress) {
     const folders = [
       "controllers",
-      "helpers",
-      "public",
+      "Utils",
       "config",
       "routes",
-      "middelwares",
-      "services"
-    ]
+      "middlewares",
+      // "services"
+    ];
 
     folders.forEach((folder) => {
-      fs.mkdirSync(`${projectPath}/src/${folder}`)
-    })
+      fs.mkdirSync(`${projectPath}/src/${folder}`);
+    });
   }
 
+  console.log(chalk.green("✔ Project folder structure created"));
 
   //content for index file
   let indexFileContent = "";
@@ -189,13 +169,11 @@ async function main() {
           console.log(\`Server running on http://localhost:\${env.PORT}\`);
         });
         `.trim();
-  }
-  else {
+  } else {
     indexFileContent = `console.log("hello from ${projectName}")`;
   }
 
   fs.writeFileSync(`./${projectName}/src/index.${ext}`, indexFileContent);
-
 
   // content of main route file
   const routerContent = `
@@ -206,19 +184,28 @@ async function main() {
   
           router.get("/", healthCheck);
   
-          export default router;`
+          export default router;`;
 
-  const controllerContent = isTS ? `
+  const controllerContent = isTS
+    ? `
           import { Request, Response } from "express";
-          ${useZod ? `
-          import { createUserSchema } from "../schemas/user.schema.ts";` : ''}
+          ${
+            useZod
+              ? `
+          import { createUserSchema } from "../schemas/user.schema.ts";`
+              : ""
+          }
           
           
           export const healthCheck = (_req: Request, res: Response) => {
-            const result = createUserSchema.safeParse(_req.body);
-            if (!result.success) {
-              return res.status(400).json(result.error.format());
+
+          if (typeof createUserSchema !== 'undefined' ) {
+          
+          const result = createUserSchema.safeParse(_req.body); 
+          if (!result.success) {
+            return res.status(400).json(result.error.format());
             }
+          }
 
             res.json({
               message: "User data is valid",
@@ -227,10 +214,13 @@ async function main() {
           
             };
             `
-    :
-    `
-            ${useZod ? `
-            import { createUserSchema } from "../schemas/user.schema.js";` : ''}
+    : `
+            ${
+              useZod
+                ? `
+            import { createUserSchema } from "../schemas/user.schema.js";`
+                : ""
+            }
             
 
             exports.healthCheck = (req, res) => {
@@ -244,14 +234,12 @@ async function main() {
                 message: "User data is valid",
                 data: result.data,
               });
+            };
             
-              };
-            
-              `
+              `;
 
   if (useZod) {
-
-    fs.mkdirSync(`./${projectName}/src/schema`)
+    fs.mkdirSync(`./${projectName}/src/schemas`);
 
     let zodSchemaIndexContent = `
           // In this folder you can write zod schema for validation check
@@ -263,17 +251,20 @@ async function main() {
             email: z.string().email(),
             age: z.number().min(18),
           });
-          `
-    fs.writeFileSync(`./${projectName}/src/schema/user.schema.${ext}`, zodSchemaIndexContent)
+          `;
+    fs.writeFileSync(
+      `./${projectName}/src/schemas/user.schema.${ext}`,
+      zodSchemaIndexContent,
+    );
   }
 
-  // env file setup 
+  // env file setup
   if (useEnv) {
     const envContent = `
         # In this file you can write your environment variables
         PORT=3000
         DATABASE_URL=your_database_url
-        `
+        `;
 
     const envConfigContnent = `
         import dotenv from "dotenv";
@@ -284,33 +275,39 @@ async function main() {
           PORT: process.env.PORT || 3000,
           DATABASE_URL: process.env.DATABASE_URL || "",
         };
-        `
-    fs.writeFileSync(`./${projectName}/.env.example`, envContent)
-    fs.writeFileSync(`./${projectName}/.env`, envContent)
+        `;
+    fs.writeFileSync(`./${projectName}/.env.example`, envContent);
+    fs.writeFileSync(`./${projectName}/.env`, envContent);
 
     //
-    fs.writeFileSync(`./${projectName}/src/config/env.${ext}`, envConfigContnent);
-    
-    fs.mkdirSync(`${projectPath}/src/lib`);
-
+    fs.writeFileSync(
+      `./${projectName}/src/config/env.${ext}`,
+      envConfigContnent,
+    );
+    // fs.mkdirSync(`${projectPath}/src/lib`);
   }
 
-
   fs.writeFileSync(`./${projectName}/src/routes/index.${ext}`, routerContent);
-  fs.writeFileSync(`./${projectName}/src/controllers/health.controller.${ext}`, controllerContent);
+  fs.writeFileSync(
+    `./${projectName}/src/controllers/health.controller.${ext}`,
+    controllerContent,
+  );
 
   // prisma setup if yes
   if (usePrisma) {
+    const prismaFileContent = `
+      import { PrismaClient } from "@prisma/client";
 
+      export const prisma = new PrismaClient();
+    `;
 
-
+    fs.mkdirSync(`./${projectName}/src/lib`);
+    fs.writeFileSync(`./${projectName}/src/lib/prisma.js`, prismaFileContent);
   }
-
-
 
   // ----- dependecny installations section -----------
 
-  console.log("📦 Installing dependencies...");
+  console.log(chalk.blue("📦 Installing dependencies..."));
 
   if (isTS) {
     let deps = " typescript @types/node ";
@@ -320,74 +317,86 @@ async function main() {
     }
 
     if (useZod) {
-      deps += ' zod '
+      deps += " zod ";
     }
 
-    if (useEnv) deps += ' dotenv '
-
-    if (usePrisma) deps += ' @prisma/client '
-
-    execSync("npm install prisma --save-dev", {
-      cwd: projectPath,
-      stdio: "inherit",
-    });
+    if (useEnv) deps += " dotenv ";
 
     // execSync is used to execute terminal commands
-    execSync(`npm install ${deps}`, {
+    execSync(`npm install ${deps} --silent --silent `, {
       cwd: projectPath,
-      stdio: "inherit",
+      stdio: "pipe",
     });
 
+    console.log(chalk.green("✔ Dependencies installed"));
 
-    execSync(`npx prisma init --datasource-provider ${prismaDB}  `, {
-      cwd: projectPath,
-      stdio: "inherit",
-    });
+    if (usePrisma) {
+      console.log(chalk.blue("🗄 Setting up Prisma..."));
 
-    execSync("npx prisma generate", {
-      cwd: projectPath,
-      stdio: "inherit",
-    });
+      execSync("npm install prisma --save-dev --silent ", {
+        cwd: projectPath,
+        stdio: "pipe",
+      });
 
+      execSync(`npx prisma init --datasource-provider ${prismaDB} --silent `, {
+        cwd: projectPath,
+        stdio: "pipe",
+      });
 
+      execSync("npx prisma generate  ", {
+        cwd: projectPath,
+        stdio: "ignore",
+      });
+
+      console.log(chalk.green("✔ Prisma ready"));
+    }
   } else {
-
     let deps = useExpress ? "express " : "";
 
     if (useZod) {
-      deps += ' zod '
+      deps += " zod ";
     }
 
-    if (useEnv) deps += ' dotenv '
-    if (usePrisma) deps += ' @prisma/client '
+    if (useEnv) deps += " dotenv ";
 
-    execSync("npm install prisma --save-dev", {
+    execSync(`npm install ${deps} --silent`, {
       cwd: projectPath,
-      stdio: "inherit",
+      stdio: "pipe",
     });
 
-    execSync(`npm install ${deps}`, {
-      cwd: projectPath,
-      stdio: "inherit",
-    });
+    console.log(chalk.green("✔ Dependencies installed"));
 
-    execSync(`npx prisma init  --datasource-provider ${prismaDB} `, {
-      cwd: projectPath,
-      stdio: "inherit",
-    });
+    if (usePrisma) {
+      console.log(chalk.blue("🗄 Setting up Prisma..."));
 
-    execSync("npx prisma generate", {
-      cwd: projectPath,
-      stdio: "inherit",
-    });
+      execSync("npm install prisma --save-dev --silent ", {
+        cwd: projectPath,
+        stdio: "pipe",
+      });
 
+      execSync(
+        `npx prisma init --datasource-provider ${prismaDB}   --silent `,
+        {
+          cwd: projectPath,
+          stdio: "pipe",
+        },
+      );
+
+      execSync("npx prisma generate  ", {
+        cwd: projectPath,
+        stdio: "ignore",
+      });
+
+      console.log(chalk.green("✔ Prisma ready"));
+    }
   }
 
-  console.log("✅ Dependencies installed");
+  console.log(chalk.green("✅ Dependencies installed"));
 
   // ----- dependecny installations section -----------
 
   if (isTS) {
+    console.log(chalk.blue("🛠 Creating tsconfig..."));
     const tsConfig = {
       compilerOptions: {
         // target : "ES2020"
@@ -405,10 +414,10 @@ async function main() {
       JSON.stringify(tsConfig, null, 2),
     );
 
-    console.log("🛠 tsconfig.json created");
+    console.log(chalk.green("✔ TypeScript configured"));
   }
 
-  console.log("Project Created 🔥");
+  console.log(chalk.green("✨ Project created successfully!"));
 }
 
 main();
