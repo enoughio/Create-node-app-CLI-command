@@ -5,14 +5,13 @@ import inquirer from "inquirer";
 import { execSync } from "child_process";
 import chalk from "chalk";
 import ora from "ora";
-import figlet from 'figlet'
+import figlet from "figlet";
 
 // import chalk from "chalk";
 
 async function main() {
-
   showBanner();
-  
+
   console.log(chalk.gray("────────────────────────────────────\n"));
 
   const projectName = process.argv[2];
@@ -328,7 +327,9 @@ async function main() {
 
     if (useEnv) deps += " dotenv ";
 
-    const installSpinner = ora(chalk.blue("📦 Installing dependencies...")).start();
+    const installSpinner = ora(
+      chalk.blue("📦 Installing dependencies..."),
+    ).start();
     // execSync is used to execute terminal commands
     try {
       execSync(`npm install ${deps} --silent --silent `, {
@@ -378,7 +379,6 @@ async function main() {
         process.exit(1);
       }
     }
-
   } else {
     let deps = useExpress ? "express " : "";
 
@@ -388,8 +388,9 @@ async function main() {
 
     if (useEnv) deps += " dotenv ";
 
-
-    const installSpinner = ora(chalk.blue("📦 Installing dependencies...")).start();
+    const installSpinner = ora(
+      chalk.blue("📦 Installing dependencies..."),
+    ).start();
     // execSync is used to execute terminal commands
     try {
       execSync(`npm install ${deps} --silent --silent `, {
@@ -415,8 +416,7 @@ async function main() {
       process.exit(1);
     }
 
-
-        if (usePrisma) {
+    if (usePrisma) {
       // console.log(chalk.blue("🗄 Setting up Prisma...  (this may take a minute)"));
 
       const prismaSpinner = ora(
@@ -442,42 +442,38 @@ async function main() {
     }
   }
 
+  initializeGit(projectPath)
+  createReadme(projectPath, projectName)
 
-  // ----- dependecny installations section -----------
   if (isTS) {
-    
-    const tsSpinner = ora(chalk.blue("🛠 Creating tsconfig...")).start()
+    const tsSpinner = ora(chalk.blue("🛠 Creating tsconfig...")).start();
     try {
+      const tsConfig = {
+        compilerOptions: {
+          // target : "ES2020"
+          module: "nodenext",
+          target: "esnext",
+          types: ["node"],
+          rootDir: "src",
+          outDir: "dist",
+          strict: true,
+        },
+      };
 
-       const tsConfig = {
-      compilerOptions: {
-        // target : "ES2020"
-        module: "nodenext",
-        target: "esnext",
-        types: ["node"],
-        rootDir: "src",
-        outDir: "dist",
-        strict: true,
-      },
-    };
+      fs.writeFileSync(
+        `${projectPath}/tsconfig.json`,
+        JSON.stringify(tsConfig, null, 2),
+      );
 
-    fs.writeFileSync(
-      `${projectPath}/tsconfig.json`,
-      JSON.stringify(tsConfig, null, 2),
-    );
-
-    tsSpinner.succeed(chalk.green(" TypeScript configured"));
-    
-  } catch (error) {
+      tsSpinner.succeed(chalk.green(" TypeScript configured"));
+    } catch (error) {
       tsSpinner.fail(chalk.green(" TypeScript configured Failed"));
-      process.exit(1)
+      process.exit(1);
     }
   }
 
   console.log(chalk.green("✨ Project created successfully!"));
 }
-
-
 
 function showBanner() {
   const banner = figlet.textSync("Create Node", {
@@ -486,8 +482,94 @@ function showBanner() {
 
   console.log(chalk.cyan(banner));
   console.log(
-    chalk.gray("Scaffold modern Node.js backends wiht just a few click\n")
+    chalk.gray("Scaffold modern Node.js backends wiht just a few click\n"),
   );
+}
+
+
+function initializeGit(projectPath: string) {
+  try {
+    // 1️⃣ Create .gitignore
+    const gitignoreContent = `
+      node_modules
+      .env
+      dist
+      build
+      coverage
+      .prisma
+      `;
+
+    fs.writeFileSync(`${projectPath}/.gitignore`, gitignoreContent.trim());
+
+    // 2️⃣ Initialize git repo
+    execSync("git init", { cwd: projectPath, stdio: "ignore" });
+
+    // 3️⃣ Set default branch to main (modern standard)
+    execSync("git branch -M main", { cwd: projectPath, stdio: "ignore" });
+
+    // 4️⃣ First commit
+    execSync("git add .", { cwd: projectPath, stdio: "ignore" });
+    execSync('git commit -m "Initial commit"', {
+      cwd: projectPath,
+      stdio: "ignore",
+    });
+
+    console.log(chalk.green(" Git repository initialized"));
+  } catch (error) {
+    console.log(chalk.red("⚠️ Git initialization skipped (Git may not be installed)"));
+  }
+}
+
+
+
+function createReadme(projectPath : string, projectName : string) {
+  const content = `# ${projectName}
+
+      A backend project generated using your custom CLI 🚀
+
+      ---
+
+      ## 📦 Installation
+
+      \`\`\`bash
+      npm install
+      \`\`\`
+
+      ---
+
+      ## 🚀 Run Development Server
+
+      \`\`\`bash
+      npm run dev
+      \`\`\`
+
+      ---
+
+      ## 🗂 Project Structure
+
+      \`\`\`
+      src/
+        controllers/
+        routes/
+        middlewares/
+        utils/
+      \`\`\`
+
+      ---
+
+      ## 🛠 Tech Stack
+
+      - Node.js
+      - Express
+      - Prisma
+      - Zod
+
+      ---
+
+      ## ✨ Created with ❤️ by Your create-nodejs-app 
+      `;
+
+  fs.writeFileSync(`${projectPath}/README.md`, content);
 }
 
 
