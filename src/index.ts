@@ -5,10 +5,16 @@ import inquirer from "inquirer";
 import { execSync } from "child_process";
 import chalk from "chalk";
 import ora from "ora";
+import figlet from 'figlet'
 
 // import chalk from "chalk";
 
 async function main() {
+
+  showBanner();
+  
+  console.log(chalk.gray("────────────────────────────────────\n"));
+
   const projectName = process.argv[2];
 
   if (!projectName) {
@@ -27,7 +33,7 @@ async function main() {
   // create project folder
   fs.mkdirSync(projectPath);
   console.log(chalk.cyan("📁 Creating Project ", projectName));
-  console.log(chalk.green("✔ Project folder created"));
+  console.log(chalk.green(" Project folder created"));
 
   // ask for programing lenguage
   const { language } = await inquirer.prompt([
@@ -134,7 +140,7 @@ async function main() {
     });
   }
 
-  console.log(chalk.green("✔ Project folder structure created"));
+  console.log(chalk.green(" Project folder structure created"));
 
   //content for index file
   let indexFileContent = "";
@@ -342,9 +348,9 @@ async function main() {
         });
       }
 
-      installSpinner.succeed(chalk.green("✔ Dependencies installed"));
+      installSpinner.succeed(chalk.green(" Dependencies installed"));
     } catch (error) {
-      installSpinner.fail(chalk.red("✔ Dependencies installation Failed"));
+      installSpinner.fail(chalk.red(" Dependencies installation Failed"));
       process.exit(1);
     }
 
@@ -366,7 +372,7 @@ async function main() {
           stdio: "ignore",
         });
 
-        prismaSpinner.succeed(chalk.green("✔ Prisma ready"));
+        prismaSpinner.succeed(chalk.green(" Prisma ready"));
       } catch (error) {
         prismaSpinner.fail(chalk.red("Prisma setup failed"));
         process.exit(1);
@@ -403,9 +409,9 @@ async function main() {
         });
       }
 
-      installSpinner.succeed(chalk.green("✔ Dependencies installed"));
+      installSpinner.succeed(chalk.green(" Dependencies installed"));
     } catch (error) {
-      installSpinner.fail(chalk.red("✔ Dependencies installation Failed"));
+      installSpinner.fail(chalk.red(" Dependencies installation Failed"));
       process.exit(1);
     }
 
@@ -428,7 +434,7 @@ async function main() {
           stdio: "ignore",
         });
 
-        prismaSpinner.succeed(chalk.green("✔ Prisma ready"));
+        prismaSpinner.succeed(chalk.green(" Prisma ready"));
       } catch (error) {
         prismaSpinner.fail(chalk.red("Prisma setup failed"));
         process.exit(1);
@@ -470,5 +476,20 @@ async function main() {
 
   console.log(chalk.green("✨ Project created successfully!"));
 }
+
+
+
+function showBanner() {
+  const banner = figlet.textSync("Create Node", {
+    horizontalLayout: "default",
+  });
+
+  console.log(chalk.cyan(banner));
+  console.log(
+    chalk.gray("Scaffold modern Node.js backends wiht just a few click\n")
+  );
+}
+
+
 
 main();
