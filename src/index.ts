@@ -4,6 +4,7 @@ import fs from "fs";
 import inquirer from "inquirer";
 import { execSync } from "child_process";
 import chalk from "chalk";
+import ora from "ora";
 
 // import chalk from "chalk";
 
@@ -65,13 +66,14 @@ async function main() {
         type: "list",
         name: "prismaDB",
         message: "Which Database you want to use with Prisma",
-        choices: ["PostgreSQL", "MySQL", "SQLite"],
+        choices: [
+          { name: "PostgreSQL", value: "postgresql" },
+          { name: "MySQL", value: "mysql" },
+          { name: "SQLite", value: "sqlite" },
+        ],
       },
     ]);
     prismaDB = res.prismaDB;
-    if (prismaDB == "an SQL Database") {
-      prismaDB = "postgresql";
-    }
   }
 
   let database = null;
@@ -307,8 +309,6 @@ async function main() {
 
   // ----- dependecny installations section -----------
 
-  console.log(chalk.blue("📦 Installing dependencies..."));
-
   if (isTS) {
     let deps = " typescript @types/node ";
 
@@ -322,34 +322,57 @@ async function main() {
 
     if (useEnv) deps += " dotenv ";
 
+    const installSpinner = ora(chalk.blue("📦 Installing dependencies...")).start();
     // execSync is used to execute terminal commands
-    execSync(`npm install ${deps} --silent --silent `, {
-      cwd: projectPath,
-      stdio: "pipe",
-    });
+    try {
+      execSync(`npm install ${deps} --silent --silent `, {
+        cwd: projectPath,
+        stdio: "pipe",
+      });
 
-    console.log(chalk.green("✔ Dependencies installed"));
+      if (usePrisma) {
+        execSync("npm install prisma --save-dev --silent ", {
+          cwd: projectPath,
+          stdio: "pipe",
+        });
+
+        execSync("npm install @prisma/client --silent", {
+          cwd: projectPath,
+          stdio: "pipe",
+        });
+      }
+
+      installSpinner.succeed(chalk.green("✔ Dependencies installed"));
+    } catch (error) {
+      installSpinner.fail(chalk.red("✔ Dependencies installation Failed"));
+      process.exit(1);
+    }
 
     if (usePrisma) {
-      console.log(chalk.blue("🗄 Setting up Prisma..."));
+      // console.log(chalk.blue("🗄 Setting up Prisma...  (this may take a minute)"));
 
-      execSync("npm install prisma --save-dev --silent ", {
-        cwd: projectPath,
-        stdio: "pipe",
-      });
+      const prismaSpinner = ora(
+        "🗄 Setting up Prisma...  (this may take a minute)",
+      ).start();
 
-      execSync(`npx prisma init --datasource-provider ${prismaDB} --silent `, {
-        cwd: projectPath,
-        stdio: "pipe",
-      });
+      try {
+        execSync(`npx prisma init --datasource-provider ${prismaDB}`, {
+          cwd: projectPath,
+          stdio: "pipe",
+        });
 
-      execSync("npx prisma generate  ", {
-        cwd: projectPath,
-        stdio: "ignore",
-      });
+        execSync("npx prisma generate  ", {
+          cwd: projectPath,
+          stdio: "ignore",
+        });
 
-      console.log(chalk.green("✔ Prisma ready"));
+        prismaSpinner.succeed(chalk.green("✔ Prisma ready"));
+      } catch (error) {
+        prismaSpinner.fail(chalk.red("Prisma setup failed"));
+        process.exit(1);
+      }
     }
+
   } else {
     let deps = useExpress ? "express " : "";
 
@@ -359,45 +382,68 @@ async function main() {
 
     if (useEnv) deps += " dotenv ";
 
-    execSync(`npm install ${deps} --silent`, {
-      cwd: projectPath,
-      stdio: "pipe",
-    });
 
-    console.log(chalk.green("✔ Dependencies installed"));
-
-    if (usePrisma) {
-      console.log(chalk.blue("🗄 Setting up Prisma..."));
-
-      execSync("npm install prisma --save-dev --silent ", {
+    const installSpinner = ora(chalk.blue("📦 Installing dependencies...")).start();
+    // execSync is used to execute terminal commands
+    try {
+      execSync(`npm install ${deps} --silent --silent `, {
         cwd: projectPath,
         stdio: "pipe",
       });
 
-      execSync(
-        `npx prisma init --datasource-provider ${prismaDB}   --silent `,
-        {
+      if (usePrisma) {
+        execSync("npm install prisma --save-dev --silent ", {
           cwd: projectPath,
           stdio: "pipe",
-        },
-      );
+        });
 
-      execSync("npx prisma generate  ", {
-        cwd: projectPath,
-        stdio: "ignore",
-      });
+        execSync("npm install @prisma/client --silent", {
+          cwd: projectPath,
+          stdio: "pipe",
+        });
+      }
 
-      console.log(chalk.green("✔ Prisma ready"));
+      installSpinner.succeed(chalk.green("✔ Dependencies installed"));
+    } catch (error) {
+      installSpinner.fail(chalk.red("✔ Dependencies installation Failed"));
+      process.exit(1);
+    }
+
+
+        if (usePrisma) {
+      // console.log(chalk.blue("🗄 Setting up Prisma...  (this may take a minute)"));
+
+      const prismaSpinner = ora(
+        "🗄 Setting up Prisma...  (this may take a minute)",
+      ).start();
+
+      try {
+        execSync(`npx prisma init --datasource-provider ${prismaDB}`, {
+          cwd: projectPath,
+          stdio: "pipe",
+        });
+
+        execSync("npx prisma generate  ", {
+          cwd: projectPath,
+          stdio: "ignore",
+        });
+
+        prismaSpinner.succeed(chalk.green("✔ Prisma ready"));
+      } catch (error) {
+        prismaSpinner.fail(chalk.red("Prisma setup failed"));
+        process.exit(1);
+      }
     }
   }
 
-  console.log(chalk.green("✅ Dependencies installed"));
 
   // ----- dependecny installations section -----------
-
   if (isTS) {
-    console.log(chalk.blue("🛠 Creating tsconfig..."));
-    const tsConfig = {
+    
+    const tsSpinner = ora(chalk.blue("🛠 Creating tsconfig...")).start()
+    try {
+
+       const tsConfig = {
       compilerOptions: {
         // target : "ES2020"
         module: "nodenext",
@@ -414,7 +460,12 @@ async function main() {
       JSON.stringify(tsConfig, null, 2),
     );
 
-    console.log(chalk.green("✔ TypeScript configured"));
+    tsSpinner.succeed(chalk.green(" TypeScript configured"));
+    
+  } catch (error) {
+      tsSpinner.fail(chalk.green(" TypeScript configured Failed"));
+      process.exit(1)
+    }
   }
 
   console.log(chalk.green("✨ Project created successfully!"));
