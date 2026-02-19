@@ -1,9 +1,9 @@
 {
-  "name": "create-node-stack",
+  "name": "create-node-stac",
   "version": "0.1.0",
   "description": "CLI to scaffold Node.js backend projects",
   "bin": {
-    "create-node-stack": "dist/index.js"
+    "create-nodejs-app": "dist/index.js"
   },
   "type": "module",
   "files": [
