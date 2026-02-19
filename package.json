@@ -1,9 +1,9 @@
 {
-  "name": "create-node-stac",
+  "name": "@enoughio/create-node-project",
   "version": "0.1.0",
   "description": "CLI to scaffold Node.js backend projects",
   "bin": {
-    "create-nodejs-app": "dist/index.js"
+    "@enoughio/create-node-project": "dist/index.js"
   },
   "type": "module",
   "files": [

@@ -566,7 +566,7 @@ function createReadme(projectPath : string, projectName : string) {
 
       ---
 
-      ## ✨ Created with ❤️ by Your create-nodejs-app 
+      ## ✨ Created with ❤️ by Your @enoughio/create-node-project 
       `;
 
   fs.writeFileSync(`${projectPath}/README.md`, content);
