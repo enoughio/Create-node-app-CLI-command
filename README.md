@@ -1,102 +1,142 @@
-# create-node-stac
+# @enoughio/create-node-project
 
-A powerful Node.js backend starter CLI to scaffold production-ready server projects instantly.
+Interactive CLI to scaffold a Node.js backend starter project.
 
-Generate a structured backend with Prisma, Zod, controllers, routes, Git initialization, and more — **in seconds**.
+It currently supports TypeScript/JavaScript selection, optional Express/Prisma/Zod/Dotenv setup, project structure generation, dependency installation, Git initialization, and starter README generation.
 
 ---
 
-## 🚀 Installation
+## Installation
 
-You can use it directly with **npx** (recommended):
+Use with `npx`:
 
 ```bash
-npx create-node-stac my-app
-Or install it globally:
-Bashnpm install -g create-node-stac
+npx @enoughio/create-node-project my-app
+```
+
+Or install globally:
+
+```bash
+npm install -g @enoughio/create-node-project
+```
+
 Then run:
-Bashcreate-node-stac my-app
-✨ Features
 
-📁 Clean folder structure (controllers, routes, middlewares, utils)
-🔐 Zod validation setup
-🗄 Prisma ORM integration
-🧱 Scalable architecture
-📦 Full TypeScript support
-🔄 Automatic Git initialization
-📝 Auto-generated professional README
-⚡ Extremely fast scaffolding
+```bash
+@enoughio/create-node-project my-app
+```
 
-📂 Generated Project Structure
-textmy-app/
+---
+
+## Usage
+
+```bash
+npx @enoughio/create-node-project my-app
+```
+
+The CLI will ask:
+
+1. Language: `TypeScript` or `JavaScript`
+2. `Express`: yes/no
+3. `Prisma`: yes/no
+4. `Zod`: yes/no
+5. `Dotenv`: yes/no
+6. If Prisma is selected: datasource provider (`postgresql`, `mysql`, or `sqlite`)
+7. If Prisma is not selected: preferred database (`PostgreSQL`, `MongoDB`, or `No database`)
+
+---
+
+## What it generates
+
+Base output:
+
+```text
+my-app/
 ├── src/
-│   ├── controllers/
-│   ├── routes/
-│   ├── middlewares/
-│   ├── utils/
-│   └── index.ts
-├── prisma/
-│   └── schema.prisma
-├── .gitignore
-├── README.md
+│   └── index.(ts|js)
 ├── package.json
-├── tsconfig.json
-└── .env.example
-🛠 Usage
-Bash# Create new project
-npx create-node-stac my-app
+├── README.md
+├── .gitignore
+└── (optional files/folders based on selections)
+```
 
-# Go to project folder
-cd my-app
+If Express is selected:
 
-# Install dependencies
-npm install
+```text
+src/
+├── controllers/
+├── routes/
+├── middlewares/
+└── utils/
+```
 
-# Start development server
-npm run dev
-🧠 Why create-node-stac?
-Setting up a new Node.js backend usually means repeating the same boring steps over and over:
+If Express or Dotenv is selected:
 
-Creating folders & files
-Configuring Prisma
-Setting up Zod validation
-Writing basic Express boilerplate
-Initializing git
-Adding scripts
-Configuring TypeScript
+```text
+src/config/
+```
 
-This CLI eliminates all of that repetition so you can jump straight into building actual features.
-📦 Tech Stack
+If Zod is selected:
 
-Node.js
-TypeScript
-Express
-Prisma (ORM)
-Zod (schema validation)
+```text
+src/schemas/user.schema.(ts|js)
+```
 
-🔮 Roadmap
+If Dotenv is selected:
 
-Advanced CLI commands (generate, add, etc.)
-Plugin system
-Multiple template presets
-Database selection during setup (PostgreSQL, MySQL, SQLite, MongoDB…)
-One-click deployment integrations (Railway, Vercel, Render, Fly.io…)
+```text
+.env
+.env.example
+src/config/env.(ts|js)
+```
 
-🤝 Contributing
-Contributions are welcome!
-If you'd like to improve the CLI:
+If Prisma is selected:
 
-Fork the repository
-Create your feature branch (git checkout -b feature/amazing-feature)
-Commit your changes (git commit -m 'Add some amazing feature')
-Push to the branch (git push origin feature/amazing-feature)
-Open a Pull Request
+```text
+prisma/                 # created by `prisma init`
+src/lib/prisma.(ts|js)
+```
 
-📄 License
-MIT License
+---
 
-⭐ Support
+## Generated scripts
 
-If this tool saves you time, please consider giving it a star on GitHub! 🌟
-Built with ❤️ to make backend development faster and less boring.
-text
+For TypeScript projects:
+
+```json
+{
+	"build": "tsc",
+	"start": "node dist/index.js"
+}
+```
+
+For JavaScript projects:
+
+```json
+{
+	"start": "node src/index.js"
+}
+```
+
+---
+
+## Included setup actions
+
+- Installs selected dependencies
+- Installs Prisma packages when Prisma is selected
+- Runs `npx prisma init --datasource-provider <provider>` and `npx prisma generate`
+- Creates `.gitignore`
+- Runs `git init`, creates `main` branch, and makes an initial commit
+
+---
+
+## Current notes
+
+- This README reflects the current implementation in `src/index.ts`.
+- If behavior changes, update this file to keep CLI docs in sync.
+
+---
+
+## License
+
+MIT
