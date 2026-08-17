@@ -140,3 +140,12 @@ For JavaScript projects:
 ## License
 
 MIT
+
+## Contact
+please leave your feedback or suggestions or complains at : 
+aniketjatav.dev@gmail.com
+
+PS : I am currently looking for a job is you have one or can help me get one please contact.
+
+
+________________________
