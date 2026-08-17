@@ -1,139 +1,260 @@
 # @enoughio/create-node-project
 
-Interactive CLI to scaffold a Node.js backend starter project.
+**Interactive CLI to scaffold modern Node.js backend projects**
 
-It currently supports TypeScript/JavaScript selection, optional Express/Prisma/Zod/Dotenv setup, project structure generation, dependency installation, Git initialization, and starter README generation.
+Quickly scaffold production-ready Node.js backends with TypeScript/JavaScript support, optional Express, Prisma, Zod validation, and environment management.
 
 ---
 
+
 ## Installation
 
-Use with `npx`:
+### Quick Start (Recommended)
+
+Use `npx` without installing globally:
 
 ```bash
 npx @enoughio/create-node-project my-app
 ```
 
-Or install globally (recommended) :
+### Global Installation
+
+Install globally once for reusable access:
 
 ```bash
 npm install -g @enoughio/create-node-project
 ```
 
-Then run:
+Then create projects anytime:
 
 ```bash
-@enoughio/create-node-project my-app
+create-node-project my-app
 ```
 
 ---
 
 ## Usage
 
+### Create a New Project
+
 ```bash
 npx @enoughio/create-node-project my-app
 ```
 
-The CLI will ask:
+### Create in Current Directory
 
-1. Language: `TypeScript` or `JavaScript`
-2. `Express`: yes/no
-3. `Prisma`: yes/no
-4. `Zod`: yes/no
-5. `Dotenv`: yes/no
-6. If Prisma is selected: datasource provider (`postgresql`, `mysql`, or `sqlite`)
-7. If Prisma is not selected: preferred database (`PostgreSQL`, `MongoDB`, or `No database`)
+To scaffold directly in the current folder:
+
+```bash
+npx @enoughio/create-node-project ./
+
+```
+
+
+## Features
+
+ **Language Support**
+- TypeScript or JavaScript
+- Fully configured with proper type definitions
+
+ **Framework & Libraries**
+- Express.js for HTTP server (optional)
+- Prisma ORM for database management (optional)
+- Zod for schema validation (optional)
+- Dotenv for environment configuration (optional)
+
+ **Automatic Setup**
+- Project structure generation
+- Dependency installation
+- Git repository initialization
+- TypeScript configuration
+- Environment file setup
+- Generated starter README
 
 ---
 
-## What it generates
 
-Base output:
+
+### Interactive Setup
+
+The CLI will prompt you to configure:
+
+1. **Language** → Choose between `TypeScript` or `JavaScript`
+2. **Express** → Include web framework? (default: yes)
+3. **Prisma** → Include database ORM? (default: no)
+4. **Zod** → Include schema validation? (default: no)
+5. **Dotenv** → Include environment config? (default: yes)
+6. **Database** → Select provider:
+   - If Prisma enabled: `postgresql`, `mysql`, or `sqlite`
+   - If Prisma disabled: `PostgreSQL`, `MongoDB`, or `No database`
+
+---
+
+## Project Structure
+
+### Base Project
+
+Every project includes:
 
 ```text
 my-app/
 ├── src/
 │   └── index.(ts|js)
 ├── package.json
-├── README.md
 ├── .gitignore
-└── (optional files/folders based on selections)
+├── README.md
+└── .env (if Dotenv selected)
 ```
 
-If Express is selected:
+### With Express
+
+Express projects include routing and controller layers:
 
 ```text
 src/
-├── controllers/
-├── routes/
-├── middlewares/
-└── utils/
+├── routes/                 # API route definitions
+├── controllers/            # Business logic handlers
+├── middlewares/            # Express middleware
+└── utils/                  # Utility functions
 ```
 
-If Express or Dotenv is selected:
+### With Prisma
+
+Database access layer:
 
 ```text
-src/config/
+prisma/
+├── schema.prisma           # Database schema
+└── migrations/             # Schema version history
+
+src/lib/prisma.(ts|js)      # Prisma client export
 ```
 
-If Zod is selected:
+### With Zod
+
+Data validation:
 
 ```text
-src/schemas/user.schema.(ts|js)
+src/schemas/user.schema.(ts|js)    # Example validation schema
 ```
 
-If Dotenv is selected:
+### With Dotenv
+
+Environment management:
 
 ```text
-.env
-.env.example
-src/config/env.(ts|js)
-```
-
-If Prisma is selected:
-
-```text
-prisma/                 # created by `prisma init`
-src/lib/prisma.(ts|js)
+.env                        # Local environment (not in git)
+.env.example                # Template for environment variables
+src/config/env.(ts|js)      # Parsed environment config
 ```
 
 ---
 
-## Generated scripts
+## Generated npm Scripts
 
-For TypeScript projects:
+### TypeScript Projects
 
 ```json
 {
-	"build": "tsc",
-	"start": "node dist/index.js"
+  "build": "tsc",           // Compile TypeScript to JavaScript
+  "start": "node dist/index.js"  // Run compiled application
 }
 ```
 
-For JavaScript projects:
+Run with:
+```bash
+npm run build   # Compile
+npm start       # Run
+```
+
+### JavaScript Projects
 
 ```json
 {
-	"start": "node src/index.js"
+  "start": "node src/index.js"   // Run directly without compilation
 }
+```
+
+Run with:
+```bash
+npm start
 ```
 
 ---
 
-## Included setup actions
+## What's Automated
 
-- Installs selected dependencies
-- Installs Prisma packages when Prisma is selected
-- Runs `npx prisma init --datasource-provider <provider>` and `npx prisma generate`
-- Creates `.gitignore`
-- Runs `git init`, creates `main` branch, and makes an initial commit
+✅ **Dependencies** - Installs all selected package dependencies  
+✅ **TypeScript** - Configures `tsconfig.json` with strict mode (if TypeScript selected)  
+✅ **Prisma** - Runs `prisma init` with your selected database provider  
+✅ **Git** - Initializes repository, creates `main` branch, and makes initial commit  
+✅ **Environment** - Creates `.env` and `.env.example` files  
+✅ **Project Files** - Generates starter code for routes, controllers, and schemas  
 
 ---
 
-## Current notes
+## Troubleshooting
 
-- This README reflects the current implementation in `src/index.ts`.
-- If behavior changes, update this file to keep CLI docs in sync.
+### Git initialization fails
+```
+⚠️ Git initialization skipped (Git may not be installed)
+```
+**Solution:** Install [Git](https://git-scm.com/), or initialize manually in the project directory afterward:
+```bash
+cd my-app
+git init
+```
+
+### Prisma setup fails
+Make sure your database provider is running and accessible. Prisma requires a valid connection string in the `.env` file.
+
+### npm install fails
+Try clearing npm cache and reinstalling:
+```bash
+npm cache clean --force
+npm install
+```
+
+---
+
+## Example: Full TypeScript + Express + Prisma
+
+```bash
+npx @enoughio/create-node-project my-api
+```
+
+Select:
+- Language: `TypeScript`
+- Express: `yes`
+- Prisma: `yes` → `PostgreSQL`
+- Zod: `yes`
+- Dotenv: `yes`
+
+Then:
+```bash
+cd my-api
+npm start          # Run development server
+npm run build      # Compile TypeScript
+```
+
+---
+
+## Tips
+
+ **Update environment variables** in `.env` before running with Prisma  
+ **Create database schema** in `prisma/schema.prisma` after generation  
+ **Modify generated schemas** in `src/schemas/` for your API validation  
+ **Extend Express app** in `src/index.ts` for custom middleware and routes  
+
+
+---
+
+## Prerequisites
+
+- **Node.js** v14 or higher
+- **npm** v6 or higher
+- **Git** (optional, for repository initialization)
+
 
 ---
 

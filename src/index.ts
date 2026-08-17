@@ -30,8 +30,10 @@ async function main() {
     process.exit(1);
   }
 
-  const projectPath = path.resolve(projectName);
-  if (fs.existsSync(projectPath)) {
+  const isCurrentFolder = projectName === "." || projectName === "./";
+  const projectPath = isCurrentFolder ? process.cwd() : path.resolve(projectName);
+
+  if (!isCurrentFolder && fs.existsSync(projectPath)) {
     console.log("❌ Folder already exists");
     process.exit(1);
   }
@@ -41,7 +43,8 @@ async function main() {
   const ext = isTS ? "ts" : "js";
 
   fs.mkdirSync(projectPath, { recursive: true });
-  console.log(chalk.cyan("📁 Creating project", projectName));
+  const displayName = isCurrentFolder ? "current folder" : projectName;
+  console.log(chalk.cyan("📁 Creating project in", displayName));
 
   createProjectStructure(projectPath, selection);
   writeProjectFiles(projectPath, projectName, selection, ext);

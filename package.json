@@ -1,6 +1,6 @@
 {
   "name": "@enoughio/create-node-project",
-  "version": "0.1.5",
+  "version": "0.2.5",
   "description": "CLI to scaffold Node.js backend projects",
   "bin": {
     "create-node-project": "dist/index.js"
