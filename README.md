@@ -14,7 +14,7 @@ Use with `npx`:
 npx @enoughio/create-node-project my-app
 ```
 
-Or install globally:
+Or install globally (recommended) :
 
 ```bash
 npm install -g @enoughio/create-node-project
@@ -144,6 +144,7 @@ MIT
 ## Contact
 please leave your feedback or suggestions or complains at : 
 aniketjatav.dev@gmail.com
+
 
 PS : I am currently looking for a job is you have one or can help me get one please contact.
 
